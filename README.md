@@ -120,7 +120,7 @@ docker volume create --driver local --opt type=none --opt device=${DIRECTORY_PAT
 ```
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 then reloading for proxy ssl configuration
@@ -137,7 +137,7 @@ For convenience you may add a new entry into your hosts file.
 
 ```
 docker volume create portainer_data
-docker-compose -f portainer-docker-compose.yml -p portainer up -d 
+docker compose -f portainer-docker-compose.yml -p portainer up -d 
 ```
 
 manage docker with [Portainer](https://www.portainer.io/solutions/docker) is the definitive container management tool for Docker, Docker Swarm with it's highly intuitive GUI and API. 
@@ -161,13 +161,13 @@ docker ps -a
 You can start the containers with the `up` command in daemon mode (by adding `-d` as an argument) or by using the `start` command:
 
 ```
-docker-compose start
+docker compose start
 ```
 
 ### Stopping containers
 
 ```
-docker-compose stop
+docker compose stop
 ```
 
 ### Removing containers
@@ -175,7 +175,7 @@ docker-compose stop
 To stop and remove all the containers use the `down` command:
 
 ```
-docker-compose down
+docker compose down
 ```
 
 to remove portainer and the other containers
@@ -186,7 +186,7 @@ docker rm -f $(docker ps -a -q)
 Use `-v` if you need to remove the database volume which is used to persist the database:
 
 ```
-docker-compose down -v
+docker compose down -v
 ```
 
 to remove external certbot-etc and portainer and the other volumes
@@ -202,7 +202,7 @@ Copy all files into a new directory:
 You can now use the `up` command:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Docker run reference
@@ -258,6 +258,7 @@ Example: Cache every successful HTTP response for 24 hours in the local Redis se
 
 ```
 use Slim\Factory\AppFactory;
+use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -265,11 +266,15 @@ $app = AppFactory::create();
 
 //...
 
-$client = new \Predis\Client('tcp://redis:6379', [
+// Create Request object from globals
+$serverRequestCreator = ServerRequestCreatorFactory::create();
+$request = $serverRequestCreator->createServerRequestFromGlobals();
+
+$client = new \Predis\Client('tcp://localhost:6379', [
 	'prefix' => $request->getUri()->getHost()
 ]);
 
-$app->add(new \RedisCache\Cache($client, [
+$app->add(new \damalis\RedisCache\Cache($client, [
 	'timeout' => 86400
 ]));
 
